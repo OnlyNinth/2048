@@ -2,6 +2,7 @@
 <html lang="zh-CN">
     <head>
         <meta charset="utf-8">
+        <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
         <link rel="shortcut icon" href="http://odueec6ir.bkt.clouddn.com/ico4.jpg">
         <title>2048</title>
         <style>
@@ -40,16 +41,29 @@
                 z-index: 100;
                 display: none;
             }
-            .result p {
+            .result-middle {
+                position: absolute;
+                top: 0;
+                right: 0;
+                bottom: 0;
+                left: 0;
+                margin: auto;
+                width: 90%;
+                height: 50%;
+            }
+            .result .result-text {
                 font-size: 60px;
                 font-weight: bold;
             }
-            .result .new-game {
+            .result .new-game, .result .challenge {
                 padding: 10px;
                 color: #f9f6f2;
                 background: #8f7a66;
                 border-radius: 3px;
                 cursor: pointer;
+            }
+            .result .challenge {
+                display: none;
             }
         </style>
     </head>
@@ -66,14 +80,16 @@
                     <span id="best-score"></span>
                 </div>
             </div>
-            <p>移动数字使用相同的合并，得到2048获胜！</p>
         </header>
 
         <article>
             <div class="grid-container">
                 <div class="result">
-                    <p class="content">Game Over!</p>
-                    <a class="new-game">再来一次</a>
+                    <div class="result-middle">
+                        <p class="result-text">Game Over!</p>
+                        <span class="new-game">重新开始</span>
+                        <span class="challenge">挑战4096</span>
+                    </div>
                 </div>
                 <div class="grid-cell" id="grid-cell-0-0"></div>
                 <div class="grid-cell" id="grid-cell-0-1"></div>
@@ -97,7 +113,7 @@
             </div>
         </article>
     </body>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
     <script>
         (function () {
             'use strict'
@@ -113,7 +129,7 @@
             var endY = 0;
             var score = 0;
             var successScore = 2048;
-
+            var gameOver = false;
             $(function () {
                 prepareForMobile();
                 newGame();
@@ -123,6 +139,7 @@
                 init();
                 generateOneNum();
                 generateOneNum();
+                $('.result').hide();
             };
             var init = function () {
                 $('.grid-container').css({
@@ -149,6 +166,7 @@
                 }
                 updateBoardView();
                 score = 0;
+                gameOver = false;
                 setScore(score);
                 return true;
             };
@@ -245,20 +263,28 @@
             };
             var isGameover = function () {
                 var $result = $('.result');
+                var $resultText = $('.result-text');
                 for (var i = 0; i < 4; i++) {
                     for (var j = 0; j < 4; j++) {
                         if(board[i][j] == successScore) {
-                            $result.child('p').text('You Win!');
+                            $resultText.text('You Win!');
+                            if (2048 == successScore) {
+                                $('.challenge').show();
+                            }
                             $result.show();
                             setBestScorse();
+                            gameOver = true;
+                            return true;
                         }
                     }
                 }
                 if (noSpace() && noMove()) {
                     $result.show();
                     setBestScorse();
+                    gameOver = true;
+                    return true;
                 }
-                return true;
+                return false;
             };
             var showNum = function (i, j, randNum) {
                 var numCell = $('#num-cell-' + i + '-' + j);
@@ -313,6 +339,7 @@
                 if (documentWidth > 500) {
                     return false;
                 }
+                $('.result p').css({'font-size': '24px'});
                 containerWidth = 0.92 * documentWidth;
                 cellWidth = 0.18 * documentWidth;
                 cellSpace = 0.04 * documentWidth;
@@ -341,6 +368,9 @@
                 }, 200);
             };
             var canMoveLeft = function () {
+                if (gameOver) {
+                    return false;
+                }
                 for (var i = 0; i < 4; i++) {
                     for (var j = 1; j < 4; j++) {
                         if (board[i][j] != 0) {
@@ -353,6 +383,9 @@
                 return false;
             };
             var canMoveUp = function () {
+                if (gameOver) {
+                    return false;
+                }
                 for (var i = 1; i < 4; i++) {
                     for (var j = 0; j < 4; j++) {
                         if (board[i][j] != 0) {
@@ -365,6 +398,9 @@
                 return false;
             };
             var canMoveRight = function () {
+                if (gameOver) {
+                    return false;
+                }
                 for (var i = 0; i < 4; i++) {
                     for (var j = 2; j >= 0; j--) {
                         if (board[i][j] != 0) {
@@ -377,6 +413,9 @@
                 return false;
             }
             var canMoveDown = function () {
+                if (gameOver) {
+                    return false;
+                }
                 for (var i = 2; i >= 0; i--) {
                     for (var j = 0; j < 4; j++) {
                         if (board[i][j] != 0) {
@@ -501,19 +540,26 @@
             };
 
             //手机端
-            $(document).on('touchstart', function (event) {
+            $('.grid-container').on('touchstart', function (event) {
+                if (event.touches.length > 1) {
+                    return false;
+                }
                 startX = event.touches[0].pageX;
                 startY = event.touches[0].pageY;
-            });
-            $(document).on('touchmove', function (event) {
                 event.preventDefault();
             });
-            $(document).on(function (event) {
-                endX = event.touches[0].pageX;
-                endY = event.touches[0].pageY;
+            $('.grid-container').on('touchmove', function (event) {
+                event.preventDefault();
+            });
+            $('.grid-container').on('touchend', function (event) {
+                if (event.touches.length > 0) {
+                    return false;
+                }
+                endX = event.changedTouches[0].pageX;
+                endY = event.changedTouches[0].pageY;
                 var deltaX = endX - startX;
                 var deltaY = endY - startY;
-                if (Math.abs(deltaX) < 0.3 * documentWidth && Math.abs(deltaY) < 0.3 * documentWidth) {
+                if (Math.abs(deltaX) < 0.1 * documentWidth && Math.abs(deltaY) < 0.1 * documentWidth) {
                     return false;
                 }
                 if (Math.abs(deltaX) > Math.abs(deltaY)) {
@@ -544,8 +590,14 @@
                     }
                 }
             });
-            $('.new-game').on('click', function () {
+            //解决ios下文字上触发click无效
+            $('.new-game').on('mousedown touchend', function () {
                 newGame();
+            });
+            $('.challenge').on('mousedown touchend', function () {
+                successScore = 4096;
+                gameOver = false;
+                $('.challenge').hide();
                 $('.result').hide();
             });
             $(document).on('keydown', function (event) {
