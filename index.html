@@ -2,7 +2,8 @@
 <html lang="zh-CN">
     <head>
         <meta charset="utf-8">
-        <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
         <link rel="shortcut icon" href="http://odueec6ir.bkt.clouddn.com/ico4.jpg">
         <title>2048</title>
         <style>
@@ -168,13 +169,13 @@
             </div>
         </article>
     </body>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="http://lib.sinaapp.com/js/jquery/3.1.0/jquery-3.1.0.min.js"></script>
     <script>
         (function () {
             'use strict'
             var board = [];
             var isConflict = [];
-            var documentWidth = window.screen.availWidth;
+            var documentWidth = document.body.clientWidth;
             var containerWidth = 500;
             var cellWidth = 100;
             var cellSpace = 20;
@@ -185,6 +186,7 @@
             var score = 0;
             var successScore = 2048;
             var gameOver = false;
+            var speed = 100;
             $(function () {
                 prepareForMobile();
                 newGame();
@@ -192,6 +194,7 @@
             });
             var newGame = function () {
                 init();
+                //alert($('.grid-container').width());
                 generateOneNum();
                 generateOneNum();
                 $('.result').hide();
@@ -411,7 +414,7 @@
                 $('#num-cell-' + fromX + '-' + fromY).animate({
                     'top': getPosTop(toX, toY),
                     'left': getPosLeft(toX, toY)
-                }, 200);
+                }, speed);
             };
             var canMoveLeft = function () {
                 if (gameOver) {
@@ -497,7 +500,7 @@
                         }
                     }
                 }
-                setTimeout(function () {updateBoardView();}, 200);
+                setTimeout(function () {updateBoardView();}, speed);
                 return true;
             };
             
@@ -525,7 +528,7 @@
                         }
                     }
                 }
-                setTimeout(function () {updateBoardView();}, 200);
+                setTimeout(function () {updateBoardView();}, speed);
                 return true;
             };
             
@@ -553,7 +556,7 @@
                         }
                     }
                 }
-                setTimeout(function () {updateBoardView();}, 200);
+                setTimeout(function () {updateBoardView();}, speed);
                 return true;
             };
             
@@ -581,7 +584,7 @@
                         }
                     }
                 }
-                setTimeout(function () {updateBoardView();}, 200);
+                setTimeout(function () {updateBoardView();}, speed);
                 return true;
             };
 
@@ -612,26 +615,26 @@
                     if (deltaX > 0) {
                         //move right
                         if (moveRight()) {
-                            setTimeout(function () {generateOneNum();}, 210);
-                            setTimeout(function () {isGameover();}, 300);
+                            setTimeout(function () {generateOneNum();}, speed + 10);
+                            setTimeout(function () {isGameover();}, speed + 100);
                         }
                     } else {
                         //move left
                         if (moveLeft()) {
-                            setTimeout(function () {generateOneNum();}, 210);
-                            setTimeout(function () {isGameover();}, 300);
+                            setTimeout(function () {generateOneNum();}, speed + 10);
+                            setTimeout(function () {isGameover();}, speed + 100);
                         }
                     }
                 } else {
                     if (deltaY > 0) {
                         if (moveDown()) {
-                            setTimeout(function () {generateOneNum();}, 210);
-                            setTimeout(function () {isGameover();}, 300);
+                            setTimeout(function () {generateOneNum();}, speed + 10);
+                            setTimeout(function () {isGameover();}, speed + 100);
                         }
                     } else {
                         if (moveUp()) {
-                            setTimeout(function () {generateOneNum();}, 210);
-                            setTimeout(function () {isGameover();}, 300);
+                            setTimeout(function () {generateOneNum();}, speed + 10);
+                            setTimeout(function () {isGameover();}, speed + 100);
                         }
                     }
                 }
@@ -652,29 +655,29 @@
                     case 37:
                         event.preventDefault();
                         if (moveLeft()) {
-                            setTimeout(function () {generateOneNum();}, 210);
-                            setTimeout(function () {isGameover();}, 300);
+                            setTimeout(function () {generateOneNum();}, speed + 10);
+                            setTimeout(function () {isGameover();}, speed + 100);
                         }
                         break;
                     case 38:
                         event.preventDefault();
                         if (moveUp()) {
-                            setTimeout(function () {generateOneNum();}, 210);
-                            setTimeout(function () {isGameover();}, 300);
+                            setTimeout(function () {generateOneNum();}, speed + 10);
+                            setTimeout(function () {isGameover();}, speed + 100);
                         }
                         break;
                     case 39:
                         event.preventDefault();
                         if (moveRight()) {
-                            setTimeout(function () {generateOneNum();}, 210);
-                            setTimeout(function () {isGameover();}, 300);
+                            setTimeout(function () {generateOneNum();}, speed + 10);
+                            setTimeout(function () {isGameover();}, speed + 100);
                         }
                         break;
                     case 40:
                         event.preventDefault();
                         if (moveDown()) {
-                            setTimeout(function () {generateOneNum();}, 210);
-                            setTimeout(function () {isGameover();}, 300);
+                            setTimeout(function () {generateOneNum();}, speed + 10);
+                            setTimeout(function () {isGameover();}, speed + 100);
                         }
                         break;
                 }
