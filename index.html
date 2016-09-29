@@ -28,6 +28,61 @@
                 text-align: center;
                 font-family: Arial;
                 font-weight: bold;
+                -webkit-transition: transform 2s ease;
+                -moz-transition: transform 2s ease;
+                -o-transition: transform 2s ease;
+                transition: transform 2s ease;
+            }
+            @-webkit-keyframes appear-course {
+                0% {
+                    opacity: 0;
+                    -webkit-transform: scale(0);
+                    -moz-transform: scale(0);
+                    transform: scale(0);
+                }
+                100% {
+                    opacity: 1;
+                    -webkit-transform: scale(1);
+                    -moz-transform: scale(1);
+                    transform: scale(1); }
+                }
+            @-moz-keyframes appear-course {
+                0% {
+                    opacity: 0;
+                    -webkit-transform: scale(0);
+                    -moz-transform: scale(0);
+                    transform: scale(0);
+                }
+
+                100% {
+                    opacity: 1;
+                    -webkit-transform: scale(1);
+                    -moz-transform: scale(1);
+                    transform: scale(1);
+                }
+            }
+
+            @keyframes appear-course {
+                0% {
+                    opacity: 0;
+                    -webkit-transform: scale(0);
+                    -moz-transform: scale(0);
+                    transform: scale(0);
+                }
+
+                100% {
+                    opacity: 1;
+                    -webkit-transform: scale(1);
+                    -moz-transform: scale(1);
+                    transform: scale(1); }
+            }
+            .appear {
+                -webkit-animation: appear-course 200ms ease 100ms;
+                -moz-animation: appear-course 200ms ease 100ms;
+                animation: appear-course 200ms ease 100ms;
+                -webkit-animation-fill-mode: backwards;
+                -moz-animation-fill-mode: backwards;
+                animation-fill-mode: backwards;
             }
             .result {
                 position: absolute;
@@ -288,17 +343,13 @@
             };
             var showNum = function (i, j, randNum) {
                 var numCell = $('#num-cell-' + i + '-' + j);
-                numCell.css({
+                numCell.addClass('appear').css({
                     'background-color': getNumBackgroundColor(randNum),
-                    'color': getNumColor(randNum)
+                    'color': getNumColor(randNum),
+                    'top': getPosTop(i, j),
+                    'left': getPosLeft(i, j)
                 });
                 numCell.text(randNum);
-                numCell.animate({
-                    width: cellWidth,
-                    height: cellWidth,
-                    top: getPosTop(i, j),
-                    left: getPosLeft(i, j)
-                }, 50);
                 return true;
             }
             var updateBoardView = function () {
@@ -307,8 +358,8 @@
                 for (var i = 0; i < 4; i++) {
                     for (var j = 0; j < 4; j++) {
                         var $cellNum = $('<div class="num-cell" id="num-cell-' + i + '-' + j + '">').css({
-                            'width': 0,
-                            'height': 0,
+                            'width': cellWidth,
+                            'height': cellWidth,
                             'line-height': cellWidth + 'px',
                             'font-size': 0.6 * cellWidth,
                             'border-radius': 0.02 * cellWidth,
@@ -317,11 +368,6 @@
                         });
                         if (board[i][j] != 0) {
                             $cellNum.css({
-                                'width': cellWidth,
-                                'height': cellWidth,
-                                'line-height': cellWidth + 'px',
-                                'font-size': 0.6 * cellWidth,
-                                'border-radius': 0.02 * cellWidth,
                                 'color': getNumColor(board[i][j]),
                                 'background-color': getNumBackgroundColor(board[i][j])
                             }).text(board[i][j]);
