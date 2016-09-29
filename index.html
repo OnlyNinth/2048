@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8">
+        <link rel="shortcut icon" href="http://odueec6ir.bkt.clouddn.com/ico4.jpg">
+        <title>2048</title>
+        <style>
+            * {
+                -webkit-box-sizing: border-box;
+                -moz-box-sizing: border-box;
+                box-sizing: border-box;
+            }
+            header {
+                text-align: center;
+            }
+            .grid-container {
+                position: relative;
+                margin: 0 auto;
+                background-color: #bbada0;
+            }
+            .grid-cell{
+                position: absolute;
+                background-color: #ccc0b3;
+            }
+            .num-cell {
+                position: absolute;
+                text-align: center;
+                font-family: Arial;
+                font-weight: bold;
+            }
+            .result {
+                position: absolute;
+                top: 0;
+                left: 0;
+                padding-top: 10%;
+                width: 100%;
+                height: 100%;
+                text-align: center;
+                background-color: rgba(238, 228, 218, 0.73);
+                z-index: 100;
+                display: none;
+            }
+            .result p {
+                font-size: 60px;
+                font-weight: bold;
+            }
+            .result .new-game {
+                padding: 10px;
+                color: #f9f6f2;
+                background: #8f7a66;
+                border-radius: 3px;
+                cursor: pointer;
+            }
+        </style>
+    </head>
+    <body>
+        <header>
+            <h1>2048</h1>
+            <div class="scores-container">
+                <div>
+                    <span>SCORE</span>
+                    <span id="score"></span>
+                </div>
+                <div>
+                    <span>BEST</span>
+                    <span id="best-score"></span>
+                </div>
+            </div>
+            <p>移动数字使用相同的合并，得到2048获胜！</p>
+        </header>
+
+        <article>
+            <div class="grid-container">
+                <div class="result">
+                    <p class="content">Game Over!</p>
+                    <a class="new-game">再来一次</a>
+                </div>
+                <div class="grid-cell" id="grid-cell-0-0"></div>
+                <div class="grid-cell" id="grid-cell-0-1"></div>
+                <div class="grid-cell" id="grid-cell-0-2"></div>
+                <div class="grid-cell" id="grid-cell-0-3"></div>
+
+                <div class="grid-cell" id="grid-cell-1-0"></div>
+                <div class="grid-cell" id="grid-cell-1-1"></div>
+                <div class="grid-cell" id="grid-cell-1-2"></div>
+                <div class="grid-cell" id="grid-cell-1-3"></div>
+
+                <div class="grid-cell" id="grid-cell-2-0"></div>
+                <div class="grid-cell" id="grid-cell-2-1"></div>
+                <div class="grid-cell" id="grid-cell-2-2"></div>
+                <div class="grid-cell" id="grid-cell-2-3"></div>
+
+                <div class="grid-cell" id="grid-cell-3-0"></div>
+                <div class="grid-cell" id="grid-cell-3-1"></div>
+                <div class="grid-cell" id="grid-cell-3-2"></div>
+                <div class="grid-cell" id="grid-cell-3-3"></div>
+            </div>
+        </article>
+    </body>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    <script>
+        (function () {
+            'use strict'
+            var board = [];
+            var isConflict = [];
+            var documentWidth = window.screen.availWidth;
+            var containerWidth = 500;
+            var cellWidth = 100;
+            var cellSpace = 20;
+            var startX = 0;
+            var startY = 0;
+            var endX = 0;
+            var endY = 0;
+            var score = 0;
+            var successScore = 2048;
+
+            $(function () {
+                prepareForMobile();
+                newGame();
+                setBestScorse();
+            });
+            var newGame = function () {
+                init();
+                generateOneNum();
+                generateOneNum();
+            };
+            var init = function () {
+                $('.grid-container').css({
+                    'width': containerWidth,
+                    'height': containerWidth,
+                    'border-radius': 0.02 * containerWidth
+                });
+                $('.grid-cell').css({
+                    'width': cellWidth,
+                    'height': cellWidth,
+                    'border-radius': 0.02 * cellWidth
+                });
+                for (var i = 0; i < 4; i++) {
+                    board[i] = [];
+                    isConflict[i] = [];
+                    for (var j = 0; j < 4; j++) {
+                        board[i][j] = 0;
+                        isConflict[i][j] = 0;
+                        $('#grid-cell-' + i + '-' + j).css({
+                            'top': getPosTop(i, j),
+                            'left': getPosLeft(i, j)
+                        });
+                    }
+                }
+                updateBoardView();
+                score = 0;
+                setScore(score);
+                return true;
+            };
+            var getPosTop = function (i, j) {
+                return cellSpace + i * (cellSpace + cellWidth);
+            };
+            var getPosLeft = function (i, j) {
+                return cellSpace + j * (cellSpace + cellWidth)
+            };
+            var getNumBackgroundColor = function (num) {
+                switch (num) {
+                    case 2: return '#eee4da'; break;
+                    case 4: return '#ede0c8'; break;
+                    case 8: return '#f2b179'; break;
+                    case 16: return '#f59563'; break;
+                    case 32: return '#f67c5f'; break;
+                    case 64: return '#f65e3b'; break;
+                    case 128: return '#edcf72'; break;
+                    case 256: return '#edcc61'; break;
+                    case 512: return '#9c0'; break;
+                    case 1024: return '#33b5e5'; break;
+                    case 2048: return '#09c'; break;
+                    case 4096: return '#a6c'; break;
+                    case 8192: return '#93c'; break;
+                }
+                return 'black';
+            }
+
+            var getNumColor = function (num) {
+                if (num <= 4) {
+                    return '#776e65';
+                }
+                return 'white';
+            }
+            var noSpace = function () {
+                for (var i = 0; i < 4; i++) {
+                    for (var j = 0; j < 4; j++) {
+                        if (board[i][j] == 0) {
+                            return false;
+                        }
+                    }
+                }
+                return true;
+            }
+            var noMove = function () {
+                if (canMoveLeft() || canMoveUp() || canMoveRight() || canMoveDown()) {
+                    return false;
+                }
+                return true;
+            };
+            var generateOneNum = function () {
+                if (noSpace()) {
+                    return false;
+                }
+                var time = 0;
+                var x = parseInt(Math.floor(Math.random() * 4));
+                var y = parseInt(Math.floor(Math.random() * 4));
+                while (time < 50) {
+                    if (board[x][y]) {
+                        x = parseInt(Math.floor(Math.random() * 4));
+                        y = parseInt(Math.floor(Math.random() * 4));
+                    } else {
+                        break;
+                    }
+                    time++;
+                }
+                if (50 <= time) {
+                    for (var i = 0; i < 4; i++) {
+                        for (var j = 0; j < 4; j++) {
+                            if (board[i][j] == 0) {
+                                x = i;
+                                y = j;
+                            }
+                        }
+                    }
+                }
+                var num = Math.random() > 0.4 ? 2 : 4;
+                board[x][y] = num;
+                if (showNum(x, y, num)) {
+                    return true;
+                }
+            };
+            var setScore = function (score) {
+                $('#score').text(score);
+                return true;
+            };
+            var setBestScorse = function () {
+                var bestScore = localStorage.getItem('bestScore_2048') || 0;
+                if (score > bestScore) {
+                    bestScore = score;
+                    localStorage.setItem('bestScore_2048', bestScore);
+                }
+                $('#best-score').text(bestScore);
+            };
+            var isGameover = function () {
+                var $result = $('.result');
+                for (var i = 0; i < 4; i++) {
+                    for (var j = 0; j < 4; j++) {
+                        if(board[i][j] == successScore) {
+                            $result.child('p').text('You Win!');
+                            $result.show();
+                            setBestScorse();
+                        }
+                    }
+                }
+                if (noSpace() && noMove()) {
+                    $result.show();
+                    setBestScorse();
+                }
+                return true;
+            };
+            var showNum = function (i, j, randNum) {
+                var numCell = $('#num-cell-' + i + '-' + j);
+                numCell.css({
+                    'background-color': getNumBackgroundColor(randNum),
+                    'color': getNumColor(randNum)
+                });
+                numCell.text(randNum);
+                numCell.animate({
+                    width: cellWidth,
+                    height: cellWidth,
+                    top: getPosTop(i, j),
+                    left: getPosLeft(i, j)
+                }, 50);
+                return true;
+            }
+            var updateBoardView = function () {
+                var $gridC = $('.grid-container');
+                $('.num-cell').remove();
+                for (var i = 0; i < 4; i++) {
+                    for (var j = 0; j < 4; j++) {
+                        var $cellNum = $('<div class="num-cell" id="num-cell-' + i + '-' + j + '">').css({
+                            'width': 0,
+                            'height': 0,
+                            'line-height': cellWidth + 'px',
+                            'font-size': 0.6 * cellWidth,
+                            'border-radius': 0.02 * cellWidth,
+                            'top': getPosTop(i, j),
+                            'left': getPosLeft(i, j)
+                        });
+                        if (board[i][j] != 0) {
+                            $cellNum.css({
+                                'width': cellWidth,
+                                'height': cellWidth,
+                                'line-height': cellWidth + 'px',
+                                'font-size': 0.6 * cellWidth,
+                                'border-radius': 0.02 * cellWidth,
+                                'color': getNumColor(board[i][j]),
+                                'background-color': getNumBackgroundColor(board[i][j])
+                            }).text(board[i][j]);
+                        }
+                        $gridC.append($cellNum);
+                        isConflict[i][j] = 0;
+                    }
+                }
+                $('.num-cell').css({
+                    'font-size': 0.6 * cellWidth + 'px'
+                });
+                return true;
+            };
+            var prepareForMobile = function () {
+                if (documentWidth > 500) {
+                    return false;
+                }
+                containerWidth = 0.92 * documentWidth;
+                cellWidth = 0.18 * documentWidth;
+                cellSpace = 0.04 * documentWidth;
+            };
+            //移动
+            var noBlockHorizontal = function (row, col1, col2) {
+                for (var j = col1 + 1; j < col2; j++) {
+                    if (board[row][j]) {
+                        return false;
+                    }
+                }
+                return true;
+            };
+            var noBlockVertical = function (col, row1, row2) {
+                for (var i = row1 + 1; i < row2; i++) {
+                    if (board[i][col]) {
+                        return false;
+                    }
+                }
+                return true;
+            };
+            var moveTo = function (fromX, fromY, toX, toY) {
+                $('#num-cell-' + fromX + '-' + fromY).animate({
+                    'top': getPosTop(toX, toY),
+                    'left': getPosLeft(toX, toY)
+                }, 200);
+            };
+            var canMoveLeft = function () {
+                for (var i = 0; i < 4; i++) {
+                    for (var j = 1; j < 4; j++) {
+                        if (board[i][j] != 0) {
+                            if (board[i][j - 1] == 0 || board[i][j - 1] == board[i][j]) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+                return false;
+            };
+            var canMoveUp = function () {
+                for (var i = 1; i < 4; i++) {
+                    for (var j = 0; j < 4; j++) {
+                        if (board[i][j] != 0) {
+                            if (board[i - 1][j] == 0 || board[i - 1 ][j] == board[i][j]) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+                return false;
+            };
+            var canMoveRight = function () {
+                for (var i = 0; i < 4; i++) {
+                    for (var j = 2; j >= 0; j--) {
+                        if (board[i][j] != 0) {
+                            if (board[i][j + 1] == 0 || board[i][j + 1] == board[i][j]) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+                return false;
+            }
+            var canMoveDown = function () {
+                for (var i = 2; i >= 0; i--) {
+                    for (var j = 0; j < 4; j++) {
+                        if (board[i][j] != 0) {
+                            if (board[i + 1][j] == 0 || board[i + 1][j] == board[i][j]) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+                return false;
+            };
+            var moveLeft = function () {
+                if (!canMoveLeft()) {
+                    return false;
+                }
+                for (var i = 0; i < 4; i++) {
+                    for (var j = 1; j < 4; j++) {
+                        if (board[i][j] != 0) {
+                            for (var k = 0; k < j; k++) {
+                                if (board[i][k] == 0) {
+                                    board[i][k] = board[i][j];
+                                    board[i][j] = 0;
+                                    moveTo(i, j, i, k);
+                                } else if (board[i][k] == board[i][j] && noBlockHorizontal(i, k, j) && !isConflict[i][k]) {
+                                    board[i][k] += board[i][j];
+                                    board[i][j] = 0;
+                                    score += board[i][k];
+                                    setScore(score);
+                                    isConflict[i][k] = 1;
+                                    moveTo(i, j, i, k);
+                                }
+                            }
+                        }
+                    }
+                }
+                setTimeout(function () {updateBoardView();}, 200);
+                return true;
+            };
+            
+            var moveUp = function () {
+                if (!canMoveUp()) {
+                    return false;
+                }
+                for (var i = 1; i < 4; i++) {
+                    for (var j = 0; j < 4; j++) {
+                        if (board[i][j] != 0) {
+                            for (var k = 0; k < i; k++) {
+                                if (board[k][j] == 0) {
+                                    board[k][j] = board[i][j];
+                                    board[i][j] = 0;
+                                    moveTo(i, j, k, j);
+                                } else if (board[k][j] == board[i][j] && noBlockVertical(j, k, i) && !isConflict[k][j]) {
+                                    board[k][j] += board[i][j];
+                                    board[i][j] = 0;
+                                    score += board[k][j];
+                                    setScore(score);
+                                    isConflict[k][j] = 1;
+                                    moveTo(i, j, k, j);
+                                }
+                            }
+                        }
+                    }
+                }
+                setTimeout(function () {updateBoardView();}, 200);
+                return true;
+            };
+            
+            var moveRight = function () {
+                if (!canMoveRight()) {
+                    return false;
+                }
+                for (var i = 0; i < 4; i++) {
+                    for (var j = 2; j >= 0; j--) {
+                        if (board[i][j] != 0) {
+                            for (var k = 3; k > j; k--) {
+                                if (board[i][k] == 0) {
+                                    board[i][k] = board[i][j];
+                                    board[i][j] = 0;
+                                    moveTo(i, j, i, k);
+                                } else if (board[i][k] == board[i][j] && noBlockHorizontal(i, j, k) && !isConflict[i][k]) {
+                                    board[i][k] += board[i][j];
+                                    board[i][j] = 0;
+                                    score += board[i][k];
+                                    setScore(score);
+                                    isConflict[i][k] = 1;
+                                    moveTo(i, j, i, k);
+                                }
+                            }
+                        }
+                    }
+                }
+                setTimeout(function () {updateBoardView();}, 200);
+                return true;
+            };
+            
+            var moveDown = function () {
+                if (!canMoveDown()) {
+                    return false;
+                }
+                for (var i = 3; i >= 0; i--) {
+                    for (var j = 0; j < 4; j++) {
+                        if (board[i][j] != 0) {
+                            for (var k = 3; k > i; k--) {
+                                if (board[k][j] == 0) {
+                                    board[k][j] = board[i][j];
+                                    board[i][j] = 0;
+                                    moveTo(i, j, k, j);
+                                } else if (board[k][j] == board[i][j] && noBlockVertical(j, i, k) && !isConflict[k][j]) {
+                                    board[k][j] += board[i][j];
+                                    board[i][j] = 0;
+                                    score += board[k][j];
+                                    setScore(score);
+                                    isConflict[k][j] = 1;
+                                    moveTo(i, j, k, j);
+                                }
+                            }
+                        }
+                    }
+                }
+                setTimeout(function () {updateBoardView();}, 200);
+                return true;
+            };
+
+            //手机端
+            $(document).on('touchstart', function (event) {
+                startX = event.touches[0].pageX;
+                startY = event.touches[0].pageY;
+            });
+            $(document).on('touchmove', function (event) {
+                event.preventDefault();
+            });
+            $(document).on(function (event) {
+                endX = event.touches[0].pageX;
+                endY = event.touches[0].pageY;
+                var deltaX = endX - startX;
+                var deltaY = endY - startY;
+                if (Math.abs(deltaX) < 0.3 * documentWidth && Math.abs(deltaY) < 0.3 * documentWidth) {
+                    return false;
+                }
+                if (Math.abs(deltaX) > Math.abs(deltaY)) {
+                    if (deltaX > 0) {
+                        //move right
+                        if (moveRight()) {
+                            setTimeout(function () {generateOneNum();}, 210);
+                            setTimeout(function () {isGameover();}, 300);
+                        }
+                    } else {
+                        //move left
+                        if (moveLeft()) {
+                            setTimeout(function () {generateOneNum();}, 210);
+                            setTimeout(function () {isGameover();}, 300);
+                        }
+                    }
+                } else {
+                    if (deltaY > 0) {
+                        if (moveDown()) {
+                            setTimeout(function () {generateOneNum();}, 210);
+                            setTimeout(function () {isGameover();}, 300);
+                        }
+                    } else {
+                        if (moveUp()) {
+                            setTimeout(function () {generateOneNum();}, 210);
+                            setTimeout(function () {isGameover();}, 300);
+                        }
+                    }
+                }
+            });
+            $('.new-game').on('click', function () {
+                newGame();
+                $('.result').hide();
+            });
+            $(document).on('keydown', function (event) {
+                //待解决：按钮按的频率过快，失败时触发多次
+                switch (event.keyCode) {
+                    case 37:
+                        event.preventDefault();
+                        if (moveLeft()) {
+                            setTimeout(function () {generateOneNum();}, 210);
+                            setTimeout(function () {isGameover();}, 300);
+                        }
+                        break;
+                    case 38:
+                        event.preventDefault();
+                        if (moveUp()) {
+                            setTimeout(function () {generateOneNum();}, 210);
+                            setTimeout(function () {isGameover();}, 300);
+                        }
+                        break;
+                    case 39:
+                        event.preventDefault();
+                        if (moveRight()) {
+                            setTimeout(function () {generateOneNum();}, 210);
+                            setTimeout(function () {isGameover();}, 300);
+                        }
+                        break;
+                    case 40:
+                        event.preventDefault();
+                        if (moveDown()) {
+                            setTimeout(function () {generateOneNum();}, 210);
+                            setTimeout(function () {isGameover();}, 300);
+                        }
+                        break;
+                }
+            });
+        })();
+    </script>
+</html>
