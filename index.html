@@ -12,8 +12,23 @@
                 -moz-box-sizing: border-box;
                 box-sizing: border-box;
             }
+            .clearfix:before,
+            .clearfix:after {
+              display: table;
+              content: '';
+            }
+            .clearfix:after {
+              clear: both;
+            }
             header {
+                margin: 0 auto;
                 text-align: center;
+            }
+            header h1 {
+                margin: 0;
+                font-size: 72px;
+                font-weight: blod;
+                color: #776e65;
             }
             .grid-container {
                 position: relative;
@@ -121,18 +136,26 @@
             .result .challenge {
                 display: none;
             }
+            @media (max-width: 768px) {
+                header h1 {
+                    font-size: 48px;
+                }
+                .result .result-text {
+                    font-size: 24px;
+                }
+            }
         </style>
     </head>
     <body>
-        <header>
+        <header class="clearfix">
             <h1>2048</h1>
             <div class="scores-container">
                 <div>
-                    <span>SCORE</span>
+                    <span>SCORE: </span>
                     <span id="score"></span>
                 </div>
                 <div>
-                    <span>BEST</span>
+                    <span>BEST: </span>
                     <span id="best-score"></span>
                 </div>
             </div>
@@ -194,7 +217,6 @@
             });
             var newGame = function () {
                 init();
-                //alert($('.grid-container').width());
                 generateOneNum();
                 generateOneNum();
                 $('.result').hide();
@@ -309,6 +331,7 @@
             };
             var setScore = function (score) {
                 $('#score').text(score);
+                $('.score-add').addClass('show-add');
                 return true;
             };
             var setBestScorse = function () {
@@ -388,7 +411,6 @@
                 if (documentWidth > 500) {
                     return false;
                 }
-                $('.result p').css({'font-size': '24px'});
                 containerWidth = 0.92 * documentWidth;
                 cellWidth = 0.18 * documentWidth;
                 cellSpace = 0.04 * documentWidth;
