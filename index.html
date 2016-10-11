@@ -36,6 +36,7 @@
                 color: #776e65;
             }
             .scores-container {
+                margin-bottom: 10px;
                 float: right;
             }
             .score-box {
@@ -50,7 +51,7 @@
                 color: #fff;
             }
             .ng-btn {
-                margin: 10px auto;
+                margin: 0 auto 10px;
                 padding: 10px;
                 float: right;
                 clear: right;
@@ -202,7 +203,7 @@
                         <span class="score" id="best-score"></span>
                     </div>
                 </div>
-                <div class="ng-btn">New Game</div>
+                <!--<div class="ng-btn">New Game</div>-->
             </header>
 
             <article>
@@ -238,6 +239,7 @@
         </div>
     </body>
     <script src="js/jquery-3.1.0.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
     <script>
         (function () {
             'use strict'
@@ -707,7 +709,7 @@
                 }
             });
             //解决ios下文字上触发click无效
-            $('.new-game, .ng-btn').on('mousedown touchend', function () {
+            $('.new-game').on('mousedown touchend', function () {
                 newGame();
             });
             $('.challenge').on('mousedown touchend', function () {
