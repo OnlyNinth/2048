@@ -20,15 +20,48 @@
             .clearfix:after {
               clear: both;
             }
+            #container {
+                margin: auto;
+                width: 500px;
+            }
+            @media (max-width: 500px) {
+                #container {
+                    width: 100%;
+                }
+            }
             header {
                 margin: 0 auto;
                 text-align: center;
             }
             header h1 {
                 margin: 0;
+                float: left;
                 font-size: 72px;
                 font-weight: blod;
                 color: #776e65;
+            }
+            .scores-container {
+                float: right;
+            }
+            .score-box {
+                padding: 15px 20px;
+                display: inline-block;
+                background-color: #bcada1;
+            }
+            .score-type {
+                color: #eae8e6;
+            }
+            .score {
+                color: #fff;
+            }
+            .ng-btn {
+                margin-top: 10px;
+                margin-bottom: 10px;
+                padding: 10px;
+                float: right;
+                clear: right;
+                background-color: #907a66;
+                cursor: pointer;
             }
             .grid-container {
                 position: relative;
@@ -147,50 +180,53 @@
         </style>
     </head>
     <body>
-        <header class="clearfix">
-            <h1>2048</h1>
-            <div class="scores-container">
-                <div>
-                    <span>SCORE: </span>
-                    <span id="score"></span>
-                </div>
-                <div>
-                    <span>BEST: </span>
-                    <span id="best-score"></span>
-                </div>
-            </div>
-        </header>
-
-        <article>
-            <div class="grid-container">
-                <div class="result">
-                    <div class="result-middle">
-                        <p class="result-text">Game Over!</p>
-                        <span class="new-game">重新开始</span>
-                        <span class="challenge">挑战4096</span>
+        <div id="container">
+            <header class="clearfix">
+                <h1>2048</h1>
+                <div class="scores-container">
+                    <div class="score-box">
+                        <span class="score-type">SCORE: </span>
+                        <span class="score" id="score"></span>
+                    </div>
+                    <div class="score-box">
+                        <span class="score-type">BEST: </span>
+                        <span class="score" id="best-score"></span>
                     </div>
                 </div>
-                <div class="grid-cell" id="grid-cell-0-0"></div>
-                <div class="grid-cell" id="grid-cell-0-1"></div>
-                <div class="grid-cell" id="grid-cell-0-2"></div>
-                <div class="grid-cell" id="grid-cell-0-3"></div>
+                <div class="ng-btn">New Game</div>
+            </header>
 
-                <div class="grid-cell" id="grid-cell-1-0"></div>
-                <div class="grid-cell" id="grid-cell-1-1"></div>
-                <div class="grid-cell" id="grid-cell-1-2"></div>
-                <div class="grid-cell" id="grid-cell-1-3"></div>
+            <article>
+                <div class="grid-container">
+                    <div class="result">
+                        <div class="result-middle">
+                            <p class="result-text">Game Over!</p>
+                            <span class="new-game">重新开始</span>
+                            <span class="challenge">挑战4096</span>
+                        </div>
+                    </div>
+                    <div class="grid-cell" id="grid-cell-0-0"></div>
+                    <div class="grid-cell" id="grid-cell-0-1"></div>
+                    <div class="grid-cell" id="grid-cell-0-2"></div>
+                    <div class="grid-cell" id="grid-cell-0-3"></div>
 
-                <div class="grid-cell" id="grid-cell-2-0"></div>
-                <div class="grid-cell" id="grid-cell-2-1"></div>
-                <div class="grid-cell" id="grid-cell-2-2"></div>
-                <div class="grid-cell" id="grid-cell-2-3"></div>
+                    <div class="grid-cell" id="grid-cell-1-0"></div>
+                    <div class="grid-cell" id="grid-cell-1-1"></div>
+                    <div class="grid-cell" id="grid-cell-1-2"></div>
+                    <div class="grid-cell" id="grid-cell-1-3"></div>
 
-                <div class="grid-cell" id="grid-cell-3-0"></div>
-                <div class="grid-cell" id="grid-cell-3-1"></div>
-                <div class="grid-cell" id="grid-cell-3-2"></div>
-                <div class="grid-cell" id="grid-cell-3-3"></div>
-            </div>
-        </article>
+                    <div class="grid-cell" id="grid-cell-2-0"></div>
+                    <div class="grid-cell" id="grid-cell-2-1"></div>
+                    <div class="grid-cell" id="grid-cell-2-2"></div>
+                    <div class="grid-cell" id="grid-cell-2-3"></div>
+
+                    <div class="grid-cell" id="grid-cell-3-0"></div>
+                    <div class="grid-cell" id="grid-cell-3-1"></div>
+                    <div class="grid-cell" id="grid-cell-3-2"></div>
+                    <div class="grid-cell" id="grid-cell-3-3"></div>
+                </div>
+            </article>
+        </div>
     </body>
     <script src="js/jquery-3.1.0.js"></script>
     <script>
@@ -662,7 +698,7 @@
                 }
             });
             //解决ios下文字上触发click无效
-            $('.new-game').on('mousedown touchend', function () {
+            $('.new-game, .ng-btn').on('mousedown touchend', function () {
                 newGame();
             });
             $('.challenge').on('mousedown touchend', function () {
